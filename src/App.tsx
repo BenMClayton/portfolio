@@ -1,120 +1,73 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { portfolio } from './portfolio';
-import {
-  ArrowUpRight,
-  Briefcase,
-  Close,
-  Code,
-  Device,
-  Github,
-  Graduation,
-  MapPin,
-  Menu,
-  Mountain,
-  Network,
-  Server,
-} from './icons';
+import { ArrowUpRight, Close, Github, Menu } from './icons';
 
 const projects = [
   {
-    number: '01',
     name: 'Edensmart',
     type: 'Smart-building platform',
     summary:
-      'A system for controlling heating, monitoring buildings and understanding energy use. I helped build it from an early idea into a live deployment in a care home.',
-    details: [
-      'Built large parts of the frontend and backend',
-      'Set up Linux hubs, remote access and deployment tools',
-      'Moved device data securely with MQTT and WireGuard',
-      'Integrated Zigbee thermostats, sensors and controls',
+      'A platform used to control heating, monitor buildings and review energy use. I worked across the web application, on-site Linux hubs, networking and Zigbee device integrations.',
+    highlights: [
+      'Built and maintained frontend and backend features',
+      'Configured Linux hubs, services and remote support tools',
+      'Moved device data securely using MQTT and WireGuard',
+      'Integrated thermostats, sensors and other Zigbee devices',
     ],
     tags: ['Node.js', 'PHP', 'MySQL', 'Linux', 'MQTT', 'Zigbee', 'WireGuard'],
-    featured: true,
   },
   {
-    number: '02',
     name: 'Edensmart Tile Editor',
-    type: 'Secure web app',
+    type: 'Flask web application',
     summary:
-      'A Flask app for building reusable dashboard tiles without editing source code. It includes accounts, permissions, validation, audit logs and automated tests.',
-    details: [],
+      'A browser-based tool for creating reusable dashboard tiles without editing source code. It includes authentication, permissions, validation, audit logs and automated tests.',
     tags: ['Python', 'Flask', 'SQLite', 'Pytest', 'Docker', 'GitHub Actions'],
     live: portfolio.tileEditorLive,
     repo: portfolio.tileEditorRepo,
   },
   {
-    number: '03',
     name: 'Edensmart Mobile App',
-    type: 'Flutter app',
+    type: 'Flutter application',
     summary:
-      'A lightweight mobile app that made the existing Edensmart platform easier to use on phones without rebuilding the whole product from scratch.',
-    details: [],
+      'A mobile application that makes the existing Edensmart platform easier to use on phones without replacing the underlying web system.',
     tags: ['Flutter', 'Dart', 'WebView'],
   },
 ];
 
+const responsibilities = [
+  'Built and maintained web interfaces, APIs, automation tools and admin features.',
+  'Set up Raspberry Pi and Linux hubs, including systemd services, updates and diagnostics.',
+  'Supported secure communication between buildings and the platform using MQTT and WireGuard.',
+  'Integrated Zigbee thermostats, sensors and controls, including manufacturer-specific device data.',
+  'Investigated faults across software, networking and hardware rather than treating them as separate problems.',
+];
+
 const skillGroups = [
-  ['Web', 'JavaScript, TypeScript, Node.js, PHP, Flask, HTML and CSS'],
-  ['Connected devices', 'Zigbee, Zigbee2MQTT, MQTT, Raspberry Pi and device integrations'],
-  ['Servers', 'Ubuntu, Linux, systemd, WireGuard, SSH and SFTP'],
-  ['Data and delivery', 'MySQL, SQLite, Git, GitHub Actions, Docker, Render and Cloudflare'],
-];
-
-const workAreas = [
   {
-    icon: Code,
-    title: 'Product development',
-    text: 'Interfaces, APIs, automation tools, analytics and admin features across the web platform.',
+    title: 'Web development',
+    items: ['JavaScript', 'TypeScript', 'Node.js', 'PHP', 'Python', 'Flask', 'HTML', 'CSS'],
   },
   {
-    icon: Server,
-    title: 'Linux and deployment',
-    text: 'On-site hubs, system services, updates, diagnostics and secure remote support.',
+    title: 'Systems and deployment',
+    items: ['Linux', 'Ubuntu', 'systemd', 'WireGuard', 'SSH', 'SFTP', 'Render', 'Cloudflare'],
   },
   {
-    icon: Network,
-    title: 'Data and networking',
-    text: 'Reliable device data from customer buildings into the platform over MQTT and WireGuard.',
+    title: 'Connected devices',
+    items: ['Zigbee', 'Zigbee2MQTT', 'MQTT', 'Raspberry Pi', 'Device integrations'],
   },
   {
-    icon: Device,
-    title: 'Device integration',
-    text: 'Zigbee thermostats, sensors and controls, including awkward manufacturer-specific data.',
+    title: 'Data and tooling',
+    items: ['MySQL', 'SQLite', 'Git', 'GitHub Actions', 'Docker', 'Pytest'],
   },
 ];
-
-function useReveal() {
-  useEffect(() => {
-    const elements = [...document.querySelectorAll<HTMLElement>('[data-reveal]')];
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      elements.forEach((element) => element.classList.add('is-visible'));
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.14 },
-    );
-
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
-  }, []);
-}
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
-  useReveal();
 
   const contactHref = portfolio.email
     ? `mailto:${portfolio.email}`
     : portfolio.linkedin || portfolio.github;
+  const contactLabel = portfolio.email ? 'Email me' : 'View my GitHub';
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -124,279 +77,204 @@ function App() {
   return (
     <div className="page-shell">
       <header className="site-header">
-        <button className="wordmark" onClick={() => scrollTo('home')}>
-          <span>BEN</span>
-          <span>CLAYTON</span>
-        </button>
+        <div className="header-inner">
+          <button className="wordmark" onClick={() => scrollTo('home')}>
+            Ben Clayton
+          </button>
 
-        <nav className={menuOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Main navigation">
-          <button onClick={() => scrollTo('work')}>Work</button>
-          <button onClick={() => scrollTo('experience')}>Experience</button>
-          <button onClick={() => scrollTo('skills')}>Skills</button>
-          <button onClick={() => scrollTo('about')}>About</button>
-          <a href={contactHref} target="_blank" rel="noreferrer">
-            Get in touch <ArrowUpRight />
-          </a>
-        </nav>
+          <nav className={menuOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Main navigation">
+            <button onClick={() => scrollTo('work')}>Projects</button>
+            <button onClick={() => scrollTo('experience')}>Experience</button>
+            <button onClick={() => scrollTo('skills')}>Skills</button>
+            <button onClick={() => scrollTo('about')}>About</button>
+            <button onClick={() => scrollTo('contact')}>Contact</button>
+          </nav>
 
-        <button
-          className="menu-toggle"
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-label="Toggle navigation"
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? <Close /> : <Menu />}
-        </button>
+          <button
+            className="menu-toggle"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label="Toggle navigation"
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <Close /> : <Menu />}
+          </button>
+        </div>
       </header>
 
       <main>
-        <section id="home" className="hero">
-          <div className="hero-intro" data-reveal>
-            <div className="availability">
-              <span /> Open to software and IT engineering roles in the UK
-            </div>
-            <h1>
-              I build software that has to work
-              <em> outside a demo.</em>
-            </h1>
-            <p>
-              I&apos;m Ben, a software engineer from Hampshire. I work across web apps,
-              Linux servers and connected devices, and I&apos;ve spent the last few years
-              helping build a smart-building system from the ground up.
+        <section id="home" className="hero section-wrap">
+          <div className="hero-copy">
+            <p className="eyebrow">Software Engineer</p>
+            <h1>Web applications, Linux systems and connected devices.</h1>
+            <p className="hero-summary">
+              I&apos;m Ben Clayton, based in Portchester, Hampshire. For the past few years
+              I&apos;ve helped build and support a smart-building platform, working across
+              its software, on-site hubs and device integrations.
             </p>
             <div className="hero-actions">
-              <button className="solid-button" onClick={() => scrollTo('work')}>
-                See my work <ArrowUpRight />
+              <button className="primary-button" onClick={() => scrollTo('work')}>
+                View projects
               </button>
-              <a className="text-link" href={portfolio.github} target="_blank" rel="noreferrer">
+              <a className="secondary-link" href={portfolio.github} target="_blank" rel="noreferrer">
                 <Github /> GitHub
               </a>
             </div>
           </div>
 
-          <aside className="hero-board" data-reveal aria-label="Current work overview">
-            <div className="board-top">
-              <span>Current focus</span>
-              <b>Edensmart</b>
-            </div>
-            <div className="board-diagram">
-              <div className="diagram-node node-devices">
-                <Device />
-                <span>Devices</span>
-                <small>Thermostats and sensors</small>
+          <aside className="hero-details" aria-label="Profile summary">
+            <dl>
+              <div>
+                <dt>Location</dt>
+                <dd>Portchester, Hampshire</dd>
               </div>
-              <div className="diagram-path path-one"><i /><span>Zigbee</span></div>
-              <div className="diagram-node node-hub">
-                <Server />
-                <span>Building hub</span>
-                <small>Linux services and buffering</small>
+              <div>
+                <dt>Current role</dt>
+                <dd>IT Engineer</dd>
               </div>
-              <div className="diagram-path path-two"><i /><span>MQTT + WireGuard</span></div>
-              <div className="diagram-node node-platform">
-                <Code />
-                <span>Web platform</span>
-                <small>Control, automation and reports</small>
+              <div>
+                <dt>Education</dt>
+                <dd>Final-year Level 6 degree apprentice</dd>
               </div>
-            </div>
-            <div className="board-footer">
-              <div><strong>3–4</strong><span>years on the product</span></div>
-              <div><strong>36</strong><span>devices in the live site</span></div>
-            </div>
+              <div>
+                <dt>Availability</dt>
+                <dd>Open to software and IT engineering roles in the UK</dd>
+              </div>
+            </dl>
           </aside>
-
-          <div className="hero-stamp" aria-hidden="true">BUILD / TEST / FIX / SHIP</div>
         </section>
 
-        <section className="quick-facts" aria-label="Quick facts">
-          <div><MapPin /><span>Portchester, Hampshire</span></div>
-          <div><Briefcase /><span>Software, infrastructure and IoT</span></div>
-          <div><Graduation /><span>Final year of a Level 6 degree apprenticeship</span></div>
-        </section>
-
-        <section id="work" className="content-section work-section">
-          <div className="section-title" data-reveal>
-            <span>01 / Work</span>
-            <h2>A few things I&apos;ve built.</h2>
-            <p>Real projects, used by real people, with the awkward parts included.</p>
+        <section id="work" className="section-wrap content-section">
+          <div className="section-heading">
+            <p className="eyebrow">Selected projects</p>
+            <h2>Work I&apos;ve contributed to</h2>
+            <p>
+              A selection of projects covering web development, infrastructure and connected devices.
+            </p>
           </div>
 
-          <div className="projects">
-            {projects.map((project) => (
-              <article
-                key={project.name}
-                className={project.featured ? 'project project-featured' : 'project'}
-                data-reveal
-              >
-                <div className="project-index">{project.number}</div>
-                <div className="project-main">
-                  <p className="project-type">{project.type}</p>
-                  <h3>{project.name}</h3>
+          <div className="project-list">
+            {projects.map((project, index) => (
+              <article className="project-row" key={project.name}>
+                <div className="project-number">0{index + 1}</div>
+                <div className="project-content">
+                  <div className="project-header">
+                    <div>
+                      <p className="project-type">{project.type}</p>
+                      <h3>{project.name}</h3>
+                    </div>
+                    {(project.live || project.repo) && (
+                      <div className="project-links">
+                        {project.live && (
+                          <a href={project.live} target="_blank" rel="noreferrer">
+                            Live site <ArrowUpRight />
+                          </a>
+                        )}
+                        {project.repo && (
+                          <a href={project.repo} target="_blank" rel="noreferrer">
+                            Source <Github />
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   <p className="project-summary">{project.summary}</p>
 
-                  {project.details.length > 0 && (
-                    <ul>
-                      {project.details.map((detail) => <li key={detail}>{detail}</li>)}
+                  {project.highlights && (
+                    <ul className="project-highlights">
+                      {project.highlights.map((item) => <li key={item}>{item}</li>)}
                     </ul>
                   )}
 
-                  <div className="tag-row">
+                  <div className="tag-list" aria-label={`${project.name} technologies`}>
                     {project.tags.map((tag) => <span key={tag}>{tag}</span>)}
                   </div>
-                </div>
-
-                <div className="project-side">
-                  {project.featured ? (
-                    <div className="project-poster" aria-hidden="true">
-                      <span>DEVICE</span>
-                      <span>TO</span>
-                      <span>DASHBOARD</span>
-                      <i>↘</i>
-                    </div>
-                  ) : (
-                    <div className="project-links">
-                      {project.live && (
-                        <a href={project.live} target="_blank" rel="noreferrer">
-                          Live site <ArrowUpRight />
-                        </a>
-                      )}
-                      {project.repo && (
-                        <a href={project.repo} target="_blank" rel="noreferrer">
-                          Source code <Github />
-                        </a>
-                      )}
-                      {!project.live && !project.repo && <span>Internal project</span>}
-                    </div>
-                  )}
                 </div>
               </article>
             ))}
           </div>
         </section>
 
-        <section id="experience" className="content-section experience-section">
-          <div className="experience-heading" data-reveal>
-            <span>02 / Experience</span>
-            <h2>I joined when it was still mostly an idea.</h2>
-            <p>
-              Since 2022, I&apos;ve worked at Yandiya Technologies / Edensprite as part of a
-              very small technical team. That meant doing much more than one narrow job.
-            </p>
-          </div>
-
-          <div className="experience-layout">
-            <div className="role-card" data-reveal>
-              <div className="role-card-top">
-                <span>2022 — present</span>
-                <span>Portchester, UK</span>
-              </div>
-              <h3>IT Engineer</h3>
-              <p>Yandiya Technologies / Edensprite</p>
-              <div className="role-breakdown">
-                <div><b>60%</b><span>Software development</span></div>
-                <div><b>30%</b><span>Servers, networking and deployment</span></div>
-                <div><b>10%</b><span>Hardware and device setup</span></div>
-              </div>
+        <section id="experience" className="section-band">
+          <div className="section-wrap experience-layout">
+            <div className="section-heading compact-heading">
+              <p className="eyebrow">Experience</p>
+              <h2>Yandiya Technologies / Edensprite</h2>
+              <p className="role-meta">IT Engineer · 2022 to present</p>
+              <p>
+                I joined a small technical team while Edensmart was still at an early stage.
+                My role has covered software development, deployment, networking and device setup.
+              </p>
             </div>
 
-            <div className="work-area-list">
-              {workAreas.map(({ icon: Icon, title, text }, index) => (
-                <article key={title} data-reveal>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <Icon />
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{text}</p>
-                  </div>
-                </article>
+            <div className="responsibility-list">
+              {responsibilities.map((item) => (
+                <div key={item} className="responsibility-item">
+                  <span aria-hidden="true" />
+                  <p>{item}</p>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="skills" className="content-section skills-section">
-          <div className="section-title light" data-reveal>
-            <span>03 / Skills</span>
-            <h2>I&apos;m comfortable working across the whole system.</h2>
+        <section id="skills" className="section-wrap content-section">
+          <div className="section-heading">
+            <p className="eyebrow">Skills</p>
+            <h2>Tools and technologies</h2>
           </div>
 
-          <div className="skill-grid">
-            {skillGroups.map(([title, list], index) => (
-              <article key={title} data-reveal>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <h3>{title}</h3>
-                <p>{list}</p>
+          <div className="skills-grid">
+            {skillGroups.map((group) => (
+              <article key={group.title}>
+                <h3>{group.title}</h3>
+                <p>{group.items.join(' · ')}</p>
               </article>
             ))}
           </div>
-
-          <div className="working-style" data-reveal>
-            <p>
-              I&apos;m at my best when I can understand the whole problem, not just one ticket.
-              I like tracing issues properly, making sensible trade-offs and leaving the
-              system easier to support than I found it.
-            </p>
-          </div>
         </section>
 
-        <section id="about" className="content-section about-section">
-          <div className="about-copy" data-reveal>
-            <span>04 / About</span>
-            <h2>Computers have always been the main thing. They&apos;re not the only thing.</h2>
-            <p>
-              I started trying to learn programming when I was eleven, after spending far
-              too much time on a slow hand-me-down computer. The early attempts were bad,
-              but the interest stuck.
-            </p>
-            <p>
-              Outside work, I climb three or four times a week and spend a lot of weekends
-              travelling around the UK in a converted Toyota Alphard. I usually end up near
-              mountains, climbing areas or somewhere well away from a city.
-            </p>
-          </div>
-
-          <div className="about-panels">
-            <article className="climbing-panel" data-reveal>
-              <Mountain />
-              <span>Climbing</span>
-              <h3>Mostly indoor bouldering, currently around V5–V6.</h3>
+        <section id="about" className="section-band about-band">
+          <div className="section-wrap about-layout">
+            <div className="section-heading compact-heading">
+              <p className="eyebrow">About</p>
+              <h2>A little more about me</h2>
+            </div>
+            <div className="about-copy">
+              <p>
+                I started learning programming when I was eleven and have continued building
+                software through personal projects, work and my degree apprenticeship.
+              </p>
+              <p>
+                Outside work, I climb several times a week and travel around the UK in a converted
+                Toyota Alphard, usually for climbing or walking trips.
+              </p>
               <a href={portfolio.youtube} target="_blank" rel="noreferrer">
                 Tom &amp; Ben Climbing <ArrowUpRight />
               </a>
-              <div className="hold hold-a" /><div className="hold hold-b" /><div className="hold hold-c" />
-            </article>
-            <article className="travel-panel" data-reveal>
-              <MapPin />
-              <span>Weekends</span>
-              <h3>A van, a mattress and somewhere worth walking around.</h3>
-              <div className="map-line"><i /><i /><i /></div>
-            </article>
+            </div>
           </div>
         </section>
 
-        <section id="contact" className="contact-section">
-          <div data-reveal>
-            <span>Let&apos;s talk</span>
-            <h2>Need someone who can take ownership of a messy technical problem?</h2>
+        <section id="contact" className="section-wrap contact-section">
+          <div>
+            <p className="eyebrow">Contact</p>
+            <h2>Open to software and IT engineering roles in the UK.</h2>
             <p>
-              I&apos;m looking for software or IT engineering work in the UK, ideally with a
-              small team building something useful.
+              You can view more of my work on GitHub or contact me through the profiles linked there.
             </p>
-            <div>
-              <a className="solid-button light-button" href={contactHref} target="_blank" rel="noreferrer">
-                Get in touch <ArrowUpRight />
-              </a>
-              <a className="text-link light-link" href={portfolio.github} target="_blank" rel="noreferrer">
-                <Github /> GitHub profile
-              </a>
-            </div>
           </div>
-          <div className="contact-mark" aria-hidden="true">BC</div>
+          <a className="primary-button contact-button" href={contactHref} target="_blank" rel="noreferrer">
+            {contactLabel} <ArrowUpRight />
+          </a>
         </section>
       </main>
 
       <footer>
-        <span>© {new Date().getFullYear()} Ben Clayton</span>
-        <button onClick={() => scrollTo('home')}>Back to top ↑</button>
+        <div className="section-wrap footer-inner">
+          <span>© {new Date().getFullYear()} Ben Clayton</span>
+          <button onClick={() => scrollTo('home')}>Back to top</button>
+        </div>
       </footer>
     </div>
   );
