@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { portfolio } from './portfolio';
 import {
-  Activity,
   ArrowUpRight,
   Briefcase,
   Close,
@@ -11,48 +10,87 @@ import {
   Graduation,
   MapPin,
   Menu,
-  Moon,
   Mountain,
   Network,
   Server,
-  Sun,
 } from './icons';
 
-type Theme = 'dark' | 'light';
-
-const skills = [
-  ['Languages', 'JavaScript, TypeScript, PHP, Python, SQL, HTML, CSS'],
-  ['Runtime & web', 'Node.js, Flask, REST APIs, server-rendered applications'],
-  ['IoT', 'Zigbee, Zigbee2MQTT, MQTT, Raspberry Pi, device integrations'],
-  ['Systems', 'Ubuntu Server, Linux, systemd, WireGuard, SSH, SFTP'],
-  ['Data & delivery', 'MySQL, SQLite, Git, GitHub Actions, Docker, Render, Cloudflare'],
+const projects = [
+  {
+    number: '01',
+    name: 'Edensmart',
+    type: 'Smart-building platform',
+    summary:
+      'A system for controlling heating, monitoring buildings and understanding energy use. I helped build it from an early idea into a live deployment in a care home.',
+    details: [
+      'Built large parts of the frontend and backend',
+      'Set up Linux hubs, remote access and deployment tools',
+      'Moved device data securely with MQTT and WireGuard',
+      'Integrated Zigbee thermostats, sensors and controls',
+    ],
+    tags: ['Node.js', 'PHP', 'MySQL', 'Linux', 'MQTT', 'Zigbee', 'WireGuard'],
+    featured: true,
+  },
+  {
+    number: '02',
+    name: 'Edensmart Tile Editor',
+    type: 'Secure web app',
+    summary:
+      'A Flask app for building reusable dashboard tiles without editing source code. It includes accounts, permissions, validation, audit logs and automated tests.',
+    details: [],
+    tags: ['Python', 'Flask', 'SQLite', 'Pytest', 'Docker', 'GitHub Actions'],
+    live: portfolio.tileEditorLive,
+    repo: portfolio.tileEditorRepo,
+  },
+  {
+    number: '03',
+    name: 'Edensmart Mobile App',
+    type: 'Flutter app',
+    summary:
+      'A lightweight mobile app that made the existing Edensmart platform easier to use on phones without rebuilding the whole product from scratch.',
+    details: [],
+    tags: ['Flutter', 'Dart', 'WebView'],
+  },
 ];
 
-const principles = [
+const skillGroups = [
+  ['Web', 'JavaScript, TypeScript, Node.js, PHP, Flask, HTML and CSS'],
+  ['Connected devices', 'Zigbee, Zigbee2MQTT, MQTT, Raspberry Pi and device integrations'],
+  ['Servers', 'Ubuntu, Linux, systemd, WireGuard, SSH and SFTP'],
+  ['Data and delivery', 'MySQL, SQLite, Git, GitHub Actions, Docker, Render and Cloudflare'],
+];
+
+const workAreas = [
   {
     icon: Code,
-    title: 'Work through the hard part',
-    text: 'I tend to stay with difficult technical problems until I understand the failure properly and can build a reliable fix.',
+    title: 'Product development',
+    text: 'Interfaces, APIs, automation tools, analytics and admin features across the web platform.',
+  },
+  {
+    icon: Server,
+    title: 'Linux and deployment',
+    text: 'On-site hubs, system services, updates, diagnostics and secure remote support.',
   },
   {
     icon: Network,
-    title: 'Own the whole path',
-    text: 'My experience spans device data, local Linux services, networking, middleware, databases and the web interface that users actually see.',
+    title: 'Data and networking',
+    text: 'Reliable device data from customer buildings into the platform over MQTT and WireGuard.',
   },
   {
-    icon: Briefcase,
-    title: 'Build for a real outcome',
-    text: 'Technical decisions matter most when they help a product reach users, reduce friction or improve somebody’s day-to-day life.',
+    icon: Device,
+    title: 'Device integration',
+    text: 'Zigbee thermostats, sensors and controls, including awkward manufacturer-specific data.',
   },
 ];
 
 function useReveal() {
   useEffect(() => {
-    const items = [...document.querySelectorAll<HTMLElement>('[data-reveal]')];
+    const elements = [...document.querySelectorAll<HTMLElement>('[data-reveal]')];
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      items.forEach((item) => item.classList.add('is-visible'));
+      elements.forEach((element) => element.classList.add('is-visible'));
       return;
     }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -62,448 +100,303 @@ function useReveal() {
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -7% 0px' },
+      { threshold: 0.14 },
     );
-    items.forEach((item) => observer.observe(item));
-    return () => observer.disconnect();
-  }, []);
-}
 
-function usePointerGlow() {
-  useEffect(() => {
-    const move = (event: PointerEvent) => {
-      document.documentElement.style.setProperty('--pointer-x', `${event.clientX}px`);
-      document.documentElement.style.setProperty('--pointer-y', `${event.clientY}px`);
-    };
-    window.addEventListener('pointermove', move, { passive: true });
-    return () => window.removeEventListener('pointermove', move);
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
   }, []);
 }
 
 function App() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme') as Theme | null;
-    if (saved) return saved;
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  });
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
-  const heroRef = useRef<HTMLElement>(null);
-
   useReveal();
-  usePointerGlow();
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const sections = [...document.querySelectorAll<HTMLElement>('main section[id]')];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActiveSection(visible.target.id);
-      },
-      { rootMargin: '-30% 0px -60%', threshold: [0.01, 0.15, 0.4] },
-    );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const value = Math.min(window.scrollY / 900, 1);
-      heroRef.current?.style.setProperty('--hero-shift', `${value * 54}px`);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const contactHref = portfolio.email
     ? `mailto:${portfolio.email}`
     : portfolio.linkedin || portfolio.github;
 
-  const nav = useMemo(
-    () => [
-      ['home', 'Overview'],
-      ['experience', 'Experience'],
-      ['work', 'Selected work'],
-      ['skills', 'Skills'],
-      ['about', 'About'],
-    ],
-    [],
-  );
-
-  const navigate = (id: string) => {
+  const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     setMenuOpen(false);
   };
 
   return (
-    <div className="site-shell">
-      <div className="pointer-glow" aria-hidden="true" />
-      <header className="topbar">
-        <button className="brand" onClick={() => navigate('home')} aria-label="Go to top">
-          <span className="brand-mark">BC</span>
-          <span className="brand-text">Ben Clayton</span>
+    <div className="page-shell">
+      <header className="site-header">
+        <button className="wordmark" onClick={() => scrollTo('home')}>
+          <span>BEN</span>
+          <span>CLAYTON</span>
         </button>
 
-        <nav className={`nav ${menuOpen ? 'is-open' : ''}`} aria-label="Primary navigation">
-          {nav.map(([id, label]) => (
-            <button
-              key={id}
-              className={activeSection === id ? 'active' : ''}
-              onClick={() => navigate(id)}
-            >
-              {label}
-            </button>
-          ))}
-          <a className="nav-contact" href={contactHref} target="_blank" rel="noreferrer">
-            Contact <ArrowUpRight />
+        <nav className={menuOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Main navigation">
+          <button onClick={() => scrollTo('work')}>Work</button>
+          <button onClick={() => scrollTo('experience')}>Experience</button>
+          <button onClick={() => scrollTo('skills')}>Skills</button>
+          <button onClick={() => scrollTo('about')}>About</button>
+          <a href={contactHref} target="_blank" rel="noreferrer">
+            Get in touch <ArrowUpRight />
           </a>
         </nav>
 
-        <div className="header-actions">
-          <button
-            className="icon-button"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-          >
-            {theme === 'dark' ? <Sun /> : <Moon />}
-          </button>
-          <button
-            className="icon-button menu-button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle navigation"
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? <Close /> : <Menu />}
-          </button>
-        </div>
+        <button
+          className="menu-toggle"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label="Toggle navigation"
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? <Close /> : <Menu />}
+        </button>
       </header>
 
       <main>
-        <section id="home" className="hero" ref={heroRef}>
-          <div className="hero-grid" aria-hidden="true" />
-          <div className="hero-orbit orbit-one" aria-hidden="true" />
-          <div className="hero-orbit orbit-two" aria-hidden="true" />
-
-          <div className="hero-copy">
-            <div className="eyebrow hero-eyebrow">
-              <span className="status-dot" />
-              {portfolio.availability}
+        <section id="home" className="hero">
+          <div className="hero-intro" data-reveal>
+            <div className="availability">
+              <span /> Open to software and IT engineering roles in the UK
             </div>
             <h1>
-              Full-stack software.
-              <span>Connected systems.</span>
-              Real-world ownership.
+              I build software that has to work
+              <em> outside a demo.</em>
             </h1>
-            <p className="hero-summary">{portfolio.summary}</p>
+            <p>
+              I&apos;m Ben, a software engineer from Hampshire. I work across web apps,
+              Linux servers and connected devices, and I&apos;ve spent the last few years
+              helping build a smart-building system from the ground up.
+            </p>
             <div className="hero-actions">
-              <button className="button primary magnetic" onClick={() => navigate('work')}>
-                View selected work <ArrowUpRight />
+              <button className="solid-button" onClick={() => scrollTo('work')}>
+                See my work <ArrowUpRight />
               </button>
-              <a className="button secondary magnetic" href={contactHref} target="_blank" rel="noreferrer">
-                Contact
+              <a className="text-link" href={portfolio.github} target="_blank" rel="noreferrer">
+                <Github /> GitHub
               </a>
             </div>
-            <div className="hero-meta">
-              <span><MapPin /> {portfolio.location}</span>
-              <span><Activity /> Mid-level</span>
-              <span><Github /> BenMClayton</span>
-            </div>
           </div>
 
-          <div className="hero-console" aria-label="Professional overview">
-            <div className="console-topline">
-              <div className="console-dots"><i /><i /><i /></div>
-              <span>profile.system</span>
-              <span>online</span>
+          <aside className="hero-board" data-reveal aria-label="Current work overview">
+            <div className="board-top">
+              <span>Current focus</span>
+              <b>Edensmart</b>
             </div>
-            <div className="console-body">
-              <div className="console-heading">
-                <div className="monogram">BC</div>
-                <div>
-                  <strong>{portfolio.name}</strong>
-                  <span>{portfolio.title}</span>
+            <div className="board-diagram">
+              <div className="diagram-node node-devices">
+                <Device />
+                <span>Devices</span>
+                <small>Thermostats and sensors</small>
+              </div>
+              <div className="diagram-path path-one"><i /><span>Zigbee</span></div>
+              <div className="diagram-node node-hub">
+                <Server />
+                <span>Building hub</span>
+                <small>Linux services and buffering</small>
+              </div>
+              <div className="diagram-path path-two"><i /><span>MQTT + WireGuard</span></div>
+              <div className="diagram-node node-platform">
+                <Code />
+                <span>Web platform</span>
+                <small>Control, automation and reports</small>
+              </div>
+            </div>
+            <div className="board-footer">
+              <div><strong>3–4</strong><span>years on the product</span></div>
+              <div><strong>36</strong><span>devices in the live site</span></div>
+            </div>
+          </aside>
+
+          <div className="hero-stamp" aria-hidden="true">BUILD / TEST / FIX / SHIP</div>
+        </section>
+
+        <section className="quick-facts" aria-label="Quick facts">
+          <div><MapPin /><span>Portchester, Hampshire</span></div>
+          <div><Briefcase /><span>Software, infrastructure and IoT</span></div>
+          <div><Graduation /><span>Final year of a Level 6 degree apprenticeship</span></div>
+        </section>
+
+        <section id="work" className="content-section work-section">
+          <div className="section-title" data-reveal>
+            <span>01 / Work</span>
+            <h2>A few things I&apos;ve built.</h2>
+            <p>Real projects, used by real people, with the awkward parts included.</p>
+          </div>
+
+          <div className="projects">
+            {projects.map((project) => (
+              <article
+                key={project.name}
+                className={project.featured ? 'project project-featured' : 'project'}
+                data-reveal
+              >
+                <div className="project-index">{project.number}</div>
+                <div className="project-main">
+                  <p className="project-type">{project.type}</p>
+                  <h3>{project.name}</h3>
+                  <p className="project-summary">{project.summary}</p>
+
+                  {project.details.length > 0 && (
+                    <ul>
+                      {project.details.map((detail) => <li key={detail}>{detail}</li>)}
+                    </ul>
+                  )}
+
+                  <div className="tag-row">
+                    {project.tags.map((tag) => <span key={tag}>{tag}</span>)}
+                  </div>
                 </div>
-              </div>
-              <div className="console-rule" />
-              <div className="console-row"><span>primary_focus</span><b>software + IoT</b></div>
-              <div className="console-row"><span>system_scope</span><b>device → dashboard</b></div>
-              <div className="console-row"><span>operating_mode</span><b>independent ownership</b></div>
-              <div className="console-row"><span>current_location</span><b>Hampshire, UK</b></div>
-              <div className="console-signal">
-                {[72, 42, 88, 56, 92, 64, 78, 48, 82, 59, 90, 68].map((height, index) => (
-                  <i key={index} style={{ height: `${height}%`, animationDelay: `${index * -0.09}s` }} />
-                ))}
-              </div>
-            </div>
+
+                <div className="project-side">
+                  {project.featured ? (
+                    <div className="project-poster" aria-hidden="true">
+                      <span>DEVICE</span>
+                      <span>TO</span>
+                      <span>DASHBOARD</span>
+                      <i>↘</i>
+                    </div>
+                  ) : (
+                    <div className="project-links">
+                      {project.live && (
+                        <a href={project.live} target="_blank" rel="noreferrer">
+                          Live site <ArrowUpRight />
+                        </a>
+                      )}
+                      {project.repo && (
+                        <a href={project.repo} target="_blank" rel="noreferrer">
+                          Source code <Github />
+                        </a>
+                      )}
+                      {!project.live && !project.repo && <span>Internal project</span>}
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
           </div>
-
-          <div className="scroll-cue" aria-hidden="true"><span /> Scroll to inspect</div>
         </section>
 
-        <section className="metrics-band" aria-label="Experience highlights">
-          <div data-reveal><strong>3–4 years</strong><span>building Edensmart from an initial idea</span></div>
-          <div data-reveal><strong>36 devices</strong><span>in the current live care-home deployment</span></div>
-          <div data-reveal><strong>~1,700</strong><span>device messages processed per day at its current scale</span></div>
-          <div data-reveal><strong>End to end</strong><span>frontend, backend, networking, hubs and deployment</span></div>
-        </section>
-
-        <section id="experience" className="section section-split">
-          <div className="section-heading" data-reveal>
-            <span className="section-index">01</span>
-            <div>
-              <p className="kicker">Experience</p>
-              <h2>A broad role inside a small technical team.</h2>
-            </div>
+        <section id="experience" className="content-section experience-section">
+          <div className="experience-heading" data-reveal>
+            <span>02 / Experience</span>
+            <h2>I joined when it was still mostly an idea.</h2>
+            <p>
+              Since 2022, I&apos;ve worked at Yandiya Technologies / Edensprite as part of a
+              very small technical team. That meant doing much more than one narrow job.
+            </p>
           </div>
 
           <div className="experience-layout">
-            <aside className="experience-summary" data-reveal>
-              <div className="sticky-card">
-                <span className="date">Mid 2022 — present</span>
-                <h3>IT Engineer</h3>
-                <p>Yandiya Technologies / Edensprite</p>
-                <div className="role-mix">
-                  <div><span style={{ width: '60%' }} /><b>60%</b><small>Software development</small></div>
-                  <div><span style={{ width: '30%' }} /><b>30%</b><small>Linux, networking & deployment</small></div>
-                  <div><span style={{ width: '10%' }} /><b>10%</b><small>Hardware & device configuration</small></div>
-                </div>
+            <div className="role-card" data-reveal>
+              <div className="role-card-top">
+                <span>2022 — present</span>
+                <span>Portchester, UK</span>
               </div>
-            </aside>
-
-            <div className="experience-content">
-              <article className="narrative-card" data-reveal>
-                <p className="large-copy">
-                  I joined while Edensmart was still an idea. Working with one other developer and direction from the IT Director, I helped turn it into a live smart-building platform used in a care home.
-                </p>
-                <p>
-                  My work has covered most of the frontend and backend, the Linux hub environment, WireGuard networking, device communication, update deployment, data handling and the diagnostic tools needed to operate the system remotely.
-                </p>
-              </article>
-
-              <div className="responsibility-grid">
-                {[
-                  [Server, 'Infrastructure', 'Designed the Ubuntu-based hub environment, systemd services, secure remote connectivity and update process.'],
-                  [Network, 'Data path', 'Moved MQTT device data from customer buildings through encrypted tunnels into middleware and the web platform.'],
-                  [Code, 'Product software', 'Built dashboard, API, automation, analytics and administrative features across Node.js, PHP and JavaScript.'],
-                  [Device, 'Device integration', 'Integrated Zigbee devices and handled inconsistent manufacturer attributes through a normalisation layer.'],
-                ].map(([Icon, title, text]) => {
-                  const Component = Icon as typeof Server;
-                  return (
-                    <article className="responsibility" data-reveal key={title as string}>
-                      <Component />
-                      <h3>{title as string}</h3>
-                      <p>{text as string}</p>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="work" className="section work-section">
-          <div className="section-heading" data-reveal>
-            <span className="section-index">02</span>
-            <div>
-              <p className="kicker">Selected work</p>
-              <h2>Projects that show technical range and ownership.</h2>
-            </div>
-          </div>
-
-          <article className="featured-project" data-reveal>
-            <div className="featured-copy">
-              <div className="project-label"><span>Primary case study</span><b>Edensmart</b></div>
-              <h3>Smart-building control and energy management, built from the ground up.</h3>
-              <p>
-                Edensmart connects heating, thermostats, environmental sensors and other building devices to a central web platform. It supports remote control, automation, energy analytics and fine-grained permissions across buildings of very different sizes.
-              </p>
-              <ul className="project-points">
-                <li>Secure device data transport over WireGuard and MQTT</li>
-                <li>Offline buffering when a building temporarily loses connectivity</li>
-                <li>Fine-grained access from individual rooms to multi-site ownership</li>
-                <li>Heating automation, tariff-aware analytics and downloadable reporting</li>
-                <li>Remote hub diagnostics and service monitoring</li>
-              </ul>
-              <div className="tag-list">
-                {['Node.js', 'PHP', 'MySQL', 'Ubuntu', 'MQTT', 'Zigbee', 'WireGuard'].map((tag) => <span key={tag}>{tag}</span>)}
+              <h3>IT Engineer</h3>
+              <p>Yandiya Technologies / Edensprite</p>
+              <div className="role-breakdown">
+                <div><b>60%</b><span>Software development</span></div>
+                <div><b>30%</b><span>Servers, networking and deployment</span></div>
+                <div><b>10%</b><span>Hardware and device setup</span></div>
               </div>
             </div>
 
-            <div className="architecture-card" aria-label="Simplified Edensmart architecture">
-              <div className="architecture-title"><span>Simplified system path</span><b>Production architecture</b></div>
-              <div className="architecture-diagram">
-                <div className="arch-column">
-                  <div className="arch-node"><Device /><span>Building devices</span><small>Zigbee sensors & controls</small></div>
-                  <div className="arch-node"><Server /><span>Local Linux hub</span><small>Services, buffering, diagnostics</small></div>
-                </div>
-                <div className="arch-flow"><span>MQTT</span><i /><span>WireGuard</span></div>
-                <div className="arch-column">
-                  <div className="arch-node"><Network /><span>Middleware</span><small>Normalisation & routing</small></div>
-                  <div className="arch-node"><Code /><span>Web platform</span><small>Control, analytics, permissions</small></div>
-                </div>
-              </div>
-              <div className="architecture-stats">
-                <div><span>36</span><small>devices live</small></div>
-                <div><span>3</span><small>rooms live</small></div>
-                <div><span>100s</span><small>planned devices</small></div>
-              </div>
-            </div>
-          </article>
-
-          <div className="project-grid">
-            <article className="project-card project-card-blue" data-reveal>
-              <div className="project-number">02</div>
-              <div>
-                <p className="kicker">Secure web application</p>
-                <h3>Edensmart Tile Editor</h3>
-                <p>
-                  A Flask application for designing reusable device-dashboard tiles without editing source code. It includes role-based access, server-side validation, standard entity mappings, audit logs and a repeatable CI/deployment path.
-                </p>
-                <div className="tag-list">
-                  {['Python 3.13', 'Flask', 'SQLite', 'Pytest', 'Docker', 'GitHub Actions'].map((tag) => <span key={tag}>{tag}</span>)}
-                </div>
-              </div>
-              <div className="project-links">
-                <a href={portfolio.tileEditorLive} target="_blank" rel="noreferrer">Live demo <ArrowUpRight /></a>
-                <a href={portfolio.tileEditorRepo} target="_blank" rel="noreferrer">Source <Github /></a>
-              </div>
-            </article>
-
-            <article className="project-card" data-reveal>
-              <div className="project-number">03</div>
-              <div>
-                <p className="kicker">Mobile delivery</p>
-                <h3>Edensmart Flutter App</h3>
-                <p>
-                  A lightweight Flutter shell that brought the existing Edensmart platform to mobile devices through an app-focused WebView experience.
-                </p>
-                <div className="tag-list">
-                  {['Flutter', 'Dart', 'WebView', 'Mobile'].map((tag) => <span key={tag}>{tag}</span>)}
-                </div>
-              </div>
-              <div className="project-status">Internal project</div>
-            </article>
-          </div>
-        </section>
-
-        <section id="skills" className="section skills-section">
-          <div className="section-heading" data-reveal>
-            <span className="section-index">03</span>
-            <div>
-              <p className="kicker">Technical range</p>
-              <h2>Comfortable below and above the application layer.</h2>
-            </div>
-          </div>
-
-          <div className="skills-layout">
-            <div className="skills-list">
-              {skills.map(([title, list], index) => (
-                <div className="skill-row" data-reveal key={title}>
+            <div className="work-area-list">
+              {workAreas.map(({ icon: Icon, title, text }, index) => (
+                <article key={title} data-reveal>
                   <span>{String(index + 1).padStart(2, '0')}</span>
-                  <h3>{title}</h3>
-                  <p>{list}</p>
-                </div>
-              ))}
-            </div>
-            <div className="principles-panel" data-reveal>
-              <p className="kicker">How I work</p>
-              {principles.map(({ icon: Icon, title, text }) => (
-                <div className="principle" key={title}>
                   <Icon />
-                  <div><h3>{title}</h3><p>{text}</p></div>
-                </div>
+                  <div>
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="section education-section">
-          <div className="section-heading" data-reveal>
-            <span className="section-index">04</span>
-            <div>
-              <p className="kicker">Education</p>
-              <h2>Formal study applied alongside production work.</h2>
-            </div>
+        <section id="skills" className="content-section skills-section">
+          <div className="section-title light" data-reveal>
+            <span>03 / Skills</span>
+            <h2>I&apos;m comfortable working across the whole system.</h2>
           </div>
-          <div className="timeline">
-            <article data-reveal>
-              <div className="timeline-icon"><Graduation /></div>
-              <div><span>In progress</span><h3>BSc (Hons) Digital & Technology Solutions</h3><p>Software Engineer pathway · University of Roehampton · delivered through QA</p></div>
-            </article>
-            <article data-reveal>
-              <div className="timeline-icon"><Code /></div>
-              <div><span>Level 4</span><h3>Software Engineer Apprenticeship</h3><p>QA</p></div>
-            </article>
-            <article data-reveal>
-              <div className="timeline-icon"><Graduation /></div>
-              <div><span>2020 — 2022</span><h3>T Level Digital Development & Design — Merit</h3><p>Fareham College</p></div>
-            </article>
+
+          <div className="skill-grid">
+            {skillGroups.map(([title, list], index) => (
+              <article key={title} data-reveal>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <h3>{title}</h3>
+                <p>{list}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="working-style" data-reveal>
+            <p>
+              I&apos;m at my best when I can understand the whole problem, not just one ticket.
+              I like tracing issues properly, making sensible trade-offs and leaving the
+              system easier to support than I found it.
+            </p>
           </div>
         </section>
 
-        <section id="about" className="section about-section">
-          <div className="about-intro" data-reveal>
-            <span className="section-index">05</span>
-            <p className="kicker">Outside the codebase</p>
-            <h2>I have been obsessed with computers since childhood, but I do not spend every hour behind one.</h2>
+        <section id="about" className="content-section about-section">
+          <div className="about-copy" data-reveal>
+            <span>04 / About</span>
+            <h2>Computers have always been the main thing. They&apos;re not the only thing.</h2>
+            <p>
+              I started trying to learn programming when I was eleven, after spending far
+              too much time on a slow hand-me-down computer. The early attempts were bad,
+              but the interest stuck.
+            </p>
+            <p>
+              Outside work, I climb three or four times a week and spend a lot of weekends
+              travelling around the UK in a converted Toyota Alphard. I usually end up near
+              mountains, climbing areas or somewhere well away from a city.
+            </p>
           </div>
 
-          <div className="about-grid">
-            <article className="about-story" data-reveal>
-              <p>
-                My first computer was a very slow hand-me-down from my grandad. I played games through ridiculous lag, watched people build things inside games, and started trying to learn programming at eleven. The early attempts went nowhere, but the interest never left.
-              </p>
-              <p>
-                Today, I want to use technology to improve people’s quality of life—whether that comes through healthcare, accessibility, sustainability or simply software that removes unnecessary difficulty.
-              </p>
+          <div className="about-panels">
+            <article className="climbing-panel" data-reveal>
+              <Mountain />
+              <span>Climbing</span>
+              <h3>Mostly indoor bouldering, currently around V5–V6.</h3>
+              <a href={portfolio.youtube} target="_blank" rel="noreferrer">
+                Tom &amp; Ben Climbing <ArrowUpRight />
+              </a>
+              <div className="hold hold-a" /><div className="hold hold-b" /><div className="hold hold-c" />
             </article>
-
-            <article className="interest-card climbing-card" data-reveal>
-              <div className="interest-icon"><Mountain /></div>
-              <p className="kicker">Indoor bouldering</p>
-              <h3>Physical problem-solving, three or four times a week.</h3>
-              <p>I was drawn to climbing because it combines movement, analysis and visible progression. I am currently working towards V5–V6.</p>
-              <a href={portfolio.youtube} target="_blank" rel="noreferrer">Tom & Ben Climbing <ArrowUpRight /></a>
-              <div className="climb-holds" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-            </article>
-
-            <article className="interest-card travel-card" data-reveal>
-              <div className="interest-icon"><MapPin /></div>
-              <p className="kicker">Low-cost adventures</p>
-              <h3>A Toyota Alphard, a mattress and somewhere rural.</h3>
-              <p>Campervan trips usually involve mountains, long walks, climbing areas, abandoned tunnels and places away from cities.</p>
-              <div className="route-line" aria-hidden="true"><i /><i /><i /><span /></div>
+            <article className="travel-panel" data-reveal>
+              <MapPin />
+              <span>Weekends</span>
+              <h3>A van, a mattress and somewhere worth walking around.</h3>
+              <div className="map-line"><i /><i /><i /></div>
             </article>
           </div>
         </section>
 
         <section id="contact" className="contact-section">
-          <div className="contact-orbit" aria-hidden="true" />
-          <div className="contact-copy" data-reveal>
-            <p className="kicker">Contact</p>
-            <h2>Looking for difficult, useful work with a team that cares about the outcome.</h2>
+          <div data-reveal>
+            <span>Let&apos;s talk</span>
+            <h2>Need someone who can take ownership of a messy technical problem?</h2>
             <p>
-              I am interested in UK-based mid-level software engineering and IT engineering roles, particularly in smaller teams where people have ownership and the company’s mission matters.
+              I&apos;m looking for software or IT engineering work in the UK, ideally with a
+              small team building something useful.
             </p>
-            <div className="contact-actions">
-              <a className="button primary" href={contactHref} target="_blank" rel="noreferrer">Contact <ArrowUpRight /></a>
-              <a className="button secondary" href={portfolio.github} target="_blank" rel="noreferrer"><Github /> GitHub</a>
+            <div>
+              <a className="solid-button light-button" href={contactHref} target="_blank" rel="noreferrer">
+                Get in touch <ArrowUpRight />
+              </a>
+              <a className="text-link light-link" href={portfolio.github} target="_blank" rel="noreferrer">
+                <Github /> GitHub profile
+              </a>
             </div>
           </div>
+          <div className="contact-mark" aria-hidden="true">BC</div>
         </section>
       </main>
 
       <footer>
         <span>© {new Date().getFullYear()} Ben Clayton</span>
-        <span>Designed and built for clarity, motion and maintainability.</span>
-        <button onClick={() => navigate('home')}>Back to top ↑</button>
+        <button onClick={() => scrollTo('home')}>Back to top ↑</button>
       </footer>
     </div>
   );

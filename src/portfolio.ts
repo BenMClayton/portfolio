@@ -1,11 +1,8 @@
 export const portfolio = {
   name: 'Ben Clayton',
-  title: 'Full-Stack & IoT Software Engineer',
+  title: 'Software Engineer',
   location: 'Portchester, Hampshire',
-  age: 22,
-  availability: 'Open to UK-based mid-level software and IT engineering roles',
-  summary:
-    'I build dependable software across web applications, Linux infrastructure and connected devices. I am most engaged when the work has a clear purpose and the technical problems are difficult enough to demand real thought.',
+  availability: 'Open to software and IT engineering roles in the UK',
   github: 'https://github.com/BenMClayton',
   linkedin: '',
   email: '',

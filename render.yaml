@@ -3,7 +3,7 @@ services:
     name: ben-clayton-portfolio
     runtime: static
     branch: main
-    buildCommand: npm ci && npm run build
+    buildCommand: npm run build
     staticPublishPath: ./dist
     autoDeployTrigger: commit
     previews:
