@@ -1,6 +1,6 @@
 # Ben Clayton — Portfolio
 
-Production-ready React and TypeScript portfolio for Ben Clayton, designed for deployment as a Render Static Site from GitHub.
+A React and TypeScript portfolio designed for deployment as a Render Static Site.
 
 ## Local development
 
@@ -17,38 +17,30 @@ npm run build
 npm run preview
 ```
 
-Vite writes the production site to `dist/`. Production source maps are disabled and JavaScript/CSS are minified. Browser-delivered code will always remain inspectable; minification is not a security boundary.
+Vite writes the production files to `dist/`.
 
 ## Personal details
 
-Edit `src/portfolio.ts` to add:
+Edit `src/portfolio.ts` to add or update:
 
-- Email
+- Email address
 - LinkedIn URL
-- Any updated profile links
+- GitHub and project links
 
-The site currently falls back to Ben's GitHub profile for the Contact button.
+Until an email or LinkedIn URL is added, the main contact button opens the GitHub profile.
 
 ## Render deployment
 
-A `render.yaml` Blueprint is included. The portfolio is stored on the repository’s `main` branch.
+The included `render.yaml` configures the site with:
 
-### Blueprint method
-
-1. In Render, choose **New → Blueprint**.
-2. Connect `BenMClayton/portfolio`.
-3. Select the `main` branch if Render asks for a branch.
-4. Render reads `render.yaml`, builds with `npm ci && npm run build`, and publishes `dist`.
-
-### Manual Static Site method
-
-- Repository: `BenMClayton/portfolio`
 - Branch: `main`
-- Build command: `npm ci && npm run build`
+- Build command: `npm run build`
 - Publish directory: `dist`
 
-Render redeploys the site after each push to the selected branch.
+Render installs the npm dependencies before running the build command.
 
-## Content notes
+## Main files
 
-The architecture diagram is intentionally simplified. It communicates engineering scope without exposing company implementation details. Add only anonymised screenshots to `public/` if Edensmart visuals are included later.
+- `src/App.tsx` — page structure and written content
+- `src/styles.css` — layout and visual styling
+- `src/portfolio.ts` — profile and project links
